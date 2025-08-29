@@ -46,7 +46,7 @@ export function truncateAfterLastParenthesis(str) {
  */
 export function parseLooseDict(str) {
     const result = {};
-    const content = str.replace(/\s+/g, '').replace(/\\"/g, '"').slice(1, -1);
+    const content = str.replace(/\s+/g, '§').replace(/\\"/g, '"').slice(1, -1);
     console.log("Parsing",content)
     let i = 0;
     const len = content.length;
@@ -98,7 +98,7 @@ export function parseLooseDict(str) {
             i++;
         }
 
-        result[key] = value.trim().replace(/,/g, '/'); // Replace commas
+        result[key] = value.trim().replace(/§/g, ' ');// restore whitespaces
 
         // Skip separators and spaces
         while (i < len && (content[i] === ',' || content[i] === ' ')) {
