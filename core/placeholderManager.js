@@ -7,22 +7,22 @@ class PlaceholderManager {
     }
 
     /**
-     * 渲染模板字符串，替换所有占位符
-     * @param {string} template - 包含占位符的模板字符串
-     * @param {object} currentSheet - 当前的表格对象
-     * @returns {string} - 渲染后的字符串
+     * Renders the template string, replacing all placeholders
+     * @param {string} template - Template string containing placeholders
+     * @param {object} currentSheet - The current sheet object
+     * @returns {string} - The rendered string
      */
     render(template, currentSheet) {
         if (!template) return '';
 
         return template.replace(this.placeholderRegex, (match, singleAddress, sheetIdentifier, cellAddress) => {
             if (singleAddress) {
-                // 处理当前工作表的单元格引用，例如 $A1
+                // Handle cell references for the current worksheet, e.g., $A1
                 const { row, col } = this.parseCellAddress(singleAddress);
                 const cell = currentSheet.findCellByPosition(row, col);
                 return cell ? cell.data.value : '';
             } else if (sheetIdentifier && cellAddress) {
-                // 处理对其他工作表的引用，例如 S[工作表名称][A1] 或 S[0][A1]
+                // Handle references to other worksheets, e.g., S[Sheet Name][A1] or S[0][A1]
                 const targetSheet = this.findSheet(sheetIdentifier);
                 if (!targetSheet) {
                     return `[Sheet "${sheetIdentifier}" not found]`;
@@ -37,12 +37,12 @@ class PlaceholderManager {
     }
 
     /**
-     * 根据标识符（名称或索引）查找工作表
-     * @param {string} identifier - 工作表名称或索引
-     * @returns {object|null} - 找到的工作表对象，如果未找到则返回 null
+     * Finds a worksheet based on the identifier (name or index)
+     * @param {string} identifier - Worksheet name or index
+     * @returns {object|null} - The found worksheet object, or null if not found
      */
     findSheet(identifier) {
-        // 检查标识符是否为数字索引
+        // Check if the identifier is a numeric index
         const sheetIndex = parseInt(identifier, 10);
         if (!isNaN(sheetIndex)) {
             const sheets = BASE.getChatSheets();
@@ -51,14 +51,14 @@ class PlaceholderManager {
             }
         }
         
-        // 否则，按名称查找工作表
+        // Otherwise, find the worksheet by name
         return BASE.getSheetByName(identifier);
     }
 
     /**
-     * 将单元格地址（例如 "A1"）解析为行和列索引
-     * @param {string} address - 单元格地址
-     * @returns {{row: number, col: number}} - 行和列索引
+     * Parses a cell address (e.g., "A1") into row and column indices
+     * @param {string} address - Cell address
+     * @returns {{row: number, col: number}} - Row and column indices
      */
     parseCellAddress(address) {
         const colStrMatch = address.match(/[A-Z]+/);

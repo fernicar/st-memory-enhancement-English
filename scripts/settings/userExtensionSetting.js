@@ -11,14 +11,14 @@ import {openAppHeaderTableDrawer} from "../renderer/appHeaderTableBaseDrawer.js"
 import {buildSheetsByTemplates} from "../../index.js"
 
 /**
- * 格式化深度设置
+ * Format depth settings
  */
 function formatDeep() {
     USER.tableBaseSetting.deep = Math.abs(USER.tableBaseSetting.deep)
 }
 
 /**
- * 更新设置中的开关状态
+ * Update the switch status in the settings
  */
 function updateSwitch(selector, switchValue) {
     if (switchValue) {
@@ -29,7 +29,7 @@ function updateSwitch(selector, switchValue) {
 }
 
 /**
- * 更新设置中的表格结构DOM
+ * Update the table structure DOM in the settings
  */
 function updateTableView() {
     const show_drawer_in_extension_list = USER.tableBaseSetting.show_drawer_in_extension_list;
@@ -39,15 +39,15 @@ function updateTableView() {
     const extensions_settings = document.querySelector('#extensions_settings');
 
     if (show_drawer_in_extension_list === true) {
-        // 如果不存在则创建
+        // If it doesn't exist, create it
         if (document.querySelector('#drawer_in_extension_list_button')) return
         $(extensionsMenu).append(`
 <div id="drawer_in_extension_list_button" class="list-group-item flex-container flexGap5 interactable">
     <div class="fa-solid fa-table extensionsMenuExtensionButton"></div>
-    <span>增强记忆表格</span>
+    <span>Enhanced Memory Table</span>
 </div>
 `);
-        // 设置点击事件
+        // Set click event
         $('#drawer_in_extension_list_button').on('click', () => {
             // $('#table_drawer_icon').click()
             openAppHeaderTableDrawer('database');
@@ -57,7 +57,7 @@ function updateTableView() {
     }
 
 //     if (show_drawer_in_extension_list === true) {
-//         // 如果不存在则创建
+//         // If it doesn't exist, create it
 //         if (document.querySelector('#drawer_in_extension_list_button')) return
 //         $(extensions_settings).append(`
 // <div id="drawer_in_extension_list_button" class="list-group-item flex-container flexGap5 interactable">
@@ -69,15 +69,15 @@ function updateTableView() {
 }
 
 function getSheetsCellStyle() {
-    const style = document.createElement('style');  // 为 sheetContainer 的内容添加一个 style
-    // 获取 sheetContainer 元素
+    const style = document.createElement('style');  // Add a style to the content of sheetContainer
+    // Get the sheetContainer element
     const cellWidth = USER.tableBaseSetting.table_cell_width_mode
     let sheet_cell_style_container = document.querySelector('#sheet_cell_style_container');
     if (sheet_cell_style_container) {
-        // 清空现有的样式
+        // Clear existing styles
         sheet_cell_style_container.innerHTML = '';
     } else {
-        // 创建一个新的 sheet_cell_style_container 元素
+        // Create a new sheet_cell_style_container element
         sheet_cell_style_container = document.createElement('div');
         sheet_cell_style_container.id = 'sheet_cell_style_container';
         document.body.appendChild(sheet_cell_style_container);
@@ -100,57 +100,57 @@ function getSheetsCellStyle() {
 }
 
 /**
- * 将表格结构转为设置DOM
- * @param {object} tableStructure 表格结构
- * @returns 设置DOM
+ * Convert table structure to settings DOM
+ * @param {object} tableStructure The table structure
+ * @returns The settings DOM
  */
 function tableStructureToSettingDOM(tableStructure) {
     const tableIndex = tableStructure.tableIndex;
     const $item = $('<div>', { class: 'dataTable_tableEditor_item' });
-    const $index = $('<div>').text(`#${tableIndex}`); // 编号
+    const $index = $('<div>').text(`#${tableIndex}`); // Number
     const $input = $('<div>', {
         class: 'tableName_pole margin0',
     });
     $input.text(tableStructure.tableName);
     const $checkboxLabel = $('<label>', { class: 'checkbox' });
     const $checkbox = $('<input>', { type: 'checkbox', 'data-index': tableIndex, checked: tableStructure.enable, class: 'tableEditor_switch' });
-    $checkboxLabel.append($checkbox, '启用');
+    $checkboxLabel.append($checkbox, 'Enable');
     const $editButton = $('<div>', {
         class: 'menu_button menu_button_icon fa-solid fa-pencil tableEditor_editButton',
-        title: '编辑',
-        'data-index': tableIndex, // 绑定索引
-    }).text('编辑');
+        title: 'Edit',
+        'data-index': tableIndex, // Bind index
+    }).text('Edit');
     $item.append($index, $input, $checkboxLabel, $editButton);
     return $item;
 }
 
 /**
- * 导入插件设置
+ * Import plugin settings
  */
 async function importTableSet() {
-    // 创建一个 input 元素，用于选择文件
+    // Create an input element to select a file
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'application/json'; // 限制文件类型为 JSON
+    input.accept = 'application/json'; // Restrict file type to JSON
 
-    // 监听 input 元素的 change 事件，当用户选择文件后触发
+    // Listen for the change event of the input element, which is triggered when the user selects a file
     input.addEventListener('change', async (event) => {
-        const file = event.target.files[0]; // 获取用户选择的文件
+        const file = event.target.files[0]; // Get the file selected by the user
 
         if (!file) {
-            return; // 用户未选择文件，直接返回
+            return; // The user did not select a file, return directly
         }
 
-        const reader = new FileReader(); // 创建 FileReader 对象来读取文件内容
+        const reader = new FileReader(); // Create a FileReader object to read the file content
 
         reader.onload = async (e) => {
             try {
-                const importedData = JSON.parse(e.target.result); // 解析 JSON 文件内容
+                const importedData = JSON.parse(e.target.result); // Parse the JSON file content
 
-                // 获取导入 JSON 的第一级 key
+                // Get the first-level keys of the imported JSON
                 const firstLevelKeys = Object.keys(importedData);
 
-                // 构建展示第一级 key 的 HTML 结构
+                // Build the HTML structure to display the first-level keys
                 let keyListHTML = '<ul>';
                 firstLevelKeys.forEach(key => {
                     keyListHTML += `<li>${key}</li>`;
@@ -158,33 +158,33 @@ async function importTableSet() {
                 keyListHTML += '</ul>';
 
                 const tableInitPopup = $(`<div>
-                    <p>即将导入的设置项 (第一级):</p>
+                    <p>Settings to be imported (first level):</p>
                     ${keyListHTML}
-                    <p>是否继续导入并重置这些设置？</p>
+                    <p>Do you want to continue importing and reset these settings?</p>
                 </div>`);
 
-                const confirmation = await EDITOR.callGenericPopup(tableInitPopup, EDITOR.POPUP_TYPE.CONFIRM, '导入设置确认', { okButton: "继续导入", cancelButton: "取消" });
-                if (!confirmation) return; // 用户取消导入
+                const confirmation = await EDITOR.callGenericPopup(tableInitPopup, EDITOR.POPUP_TYPE.CONFIRM, 'Import Settings Confirmation', { okButton: "Continue Import", cancelButton: "Cancel" });
+                if (!confirmation) return; // User canceled the import
 
-                // 用户确认导入后，进行数据应用
-                // 注意：这里假设你需要将 importedData 的所有内容都合并到 USER.tableBaseSetting 中
-                // 你可能需要根据实际需求调整数据合并逻辑，例如只合并第一级 key 对应的数据，或者进行更细粒度的合并
+                // After the user confirms the import, apply the data
+                // Note: Here it is assumed that you need to merge all the content of importedData into USER.tableBaseSetting
+                // You may need to adjust the data merging logic according to your actual needs, for example, only merge the data corresponding to the first-level keys, or perform a more fine-grained merge
                 for (let key in importedData) {
                     USER.tableBaseSetting[key] = importedData[key];
                 }
 
-                renderSetting(); // 重新渲染设置界面，应用新的设置
-                // 重新转换模板
+                renderSetting(); // Re-render the settings interface to apply the new settings
+                // Re-convert the template
                 initTableStructureToTemplate()
-                BASE.refreshTempView(true) // 刷新模板视图
-                EDITOR.success('导入成功并已重置所选设置'); // 提示用户导入成功
+                BASE.refreshTempView(true) // Refresh the template view
+                EDITOR.success('Imported successfully and reset selected settings'); // Prompt the user that the import was successful
 
-                // 导入预设时可选清空 chat 域并用全局模板覆盖到 chat 域
+                // When importing presets, optionally clear the chat domain and overwrite it with the global template
                 try {
                     const { piece } = USER.getChatPiece() || {};
-                    // 判定：若无载体则跳过（无法保存到聊天记录）
+                    // Logic: If there is no carrier, skip (cannot save to chat history)
                     if (piece) {
-                        // 若当前会话中的表数据全部为空，自动替换
+                        // If all table data in the current session is empty, replace automatically
                         const chatArr = USER.getContext()?.chat || [];
                         let isSheetEmpty = true;
                         for (let i = chatArr.length - 1; i >= 0; i--) {
@@ -198,18 +198,18 @@ async function importTableSet() {
                                 break;
                             }
                         }
-                        // 若当前会话中的表数据非空，先征询用户确认再执行替换
+                        // If the table data in the current session is not empty, ask for confirmation before replacing
                         const confirmReplace = isSheetEmpty ? true : await EDITOR.callGenericPopup(
-                            '是否清空旧表格数据（无法找回），并替换为新表格预设的模板（包括表格结构）<br>仅限新旧表格预设模板一致时可不替换<br>若新旧模板不一致，例如更换为不同表格预设时，应选择替换，否则将不能正常使用新预设<br>若同一表格预设更新版本，应参见预设发布说明，模板一致时可不替换',
+                            'Do you want to clear old table data (irrecoverable) and replace it with the new preset template (including table structure)?<br>You may skip replacement only if the old and new templates are identical.<br>If the templates differ (e.g., switching to a different preset), you should choose to replace, otherwise the new preset will not function correctly.<br>If updating the same preset version, refer to the release notes; if the templates are consistent, replacement is optional.',
                             EDITOR.POPUP_TYPE.CONFIRM,
-                            '替换模板确认',
-                            { okButton: '替换', cancelButton: '不替换' }
+                            'Template Replacement Confirmation',
+                            { okButton: 'Replace', cancelButton: 'Do Not Replace' }
                         );
                         if (!confirmReplace) {
-                            EDITOR.success && EDITOR.success('已取消模板替换');
+                            EDITOR.success && EDITOR.success('Template replacement canceled');
                         } else {
-                            BASE.sheetsData.context = {}; // 清空 chat 域并用全局模板重建
-                            // 删除聊天列表中所有 piece 的 hash_sheets
+                            BASE.sheetsData.context = {}; // Clear chat domain and rebuild using global template
+                            // Delete hash_sheets for all pieces in the chat list
                             try {
                                 for (const msg of chatArr) {
                                     if (msg && Object.prototype.hasOwnProperty.call(msg, 'hash_sheets')) {
@@ -217,46 +217,46 @@ async function importTableSet() {
                                     }
                                 }
                             } catch (_) {}
-                            // 在当前载体上用全局模板重建
+                            // Rebuild on the current carrier using the global template
                             buildSheetsByTemplates(piece);
-                            // 刷新界面与系统消息
+                            // Refresh interface and system messages
                             BASE.refreshContextView();
                             BASE.refreshTempView(true)
                             updateSystemMessageTableStatus(true);
-                            EDITOR.success('已用全局模板覆盖到 chat 域');
+                            EDITOR.success('Global template has overwritten the chat domain');
                         }
                     } else {
-                        // 无载体时给出明确提示
-                        EDITOR.warning('因为当前聊天没有聊天载体所以跳过预设表格模板替换');
+                        // Prompt clearly if there is no carrier
+                        EDITOR.warning('Skipped preset table template replacement because the current session has no carrier');
                     }
                 } catch (e) {
-                    // 静默失败，不影响导入主流程
-                    console.warn('[Preset Import] 覆盖 chat 域模板时发生非致命错误：', e);
+                    // Fail silently, does not affect the main import process
+                    console.warn('[Preset Import] Non-fatal error occurred while overwriting chat domain template:', e);
                 }
 
             } catch (error) {
-                EDITOR.error('JSON 文件解析失败，请检查文件格式是否正确。', error.message, error); // 提示 JSON 解析失败
-                console.error("文件读取或解析错误:", error); // 打印详细错误信息到控制台
+                EDITOR.error('JSON file parsing failed, please check if the file format is correct.', error.message, error); // Prompt that JSON parsing failed
+                console.error("File reading or parsing error:", error); // Print detailed error information to the console
             }
         };
 
         reader.onerror = (error) => {
-            EDITOR.error(`文件读取失败`, error.message, error); // 提示文件读取失败
+            EDITOR.error(`File reading failed`, error.message, error); // Prompt that file reading failed
         };
 
-        reader.readAsText(file); // 以文本格式读取文件内容
+        reader.readAsText(file); // Read the file content as text
     });
 
-    input.click(); // 模拟点击 input 元素，弹出文件选择框
+    input.click(); // Simulate clicking the input element to pop up the file selection box
 }
 
 
 /**
- * 导出插件设置
+ * Export plugin settings
  */
 async function exportTableSet() {
     templateToTableStructure()
-    const { filterData, confirmation } = await filterTableDataPopup(USER.tableBaseSetting,"请选择需要导出的数据","")
+    const { filterData, confirmation } = await filterTableDataPopup(USER.tableBaseSetting,"Please select the data to export","")
     if (!confirmation) return;
 
     try {
@@ -267,17 +267,17 @@ async function exportTableSet() {
         a.download = `tableCustomConfig-${SYSTEM.generateRandomString(8)}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        EDITOR.success('导出成功');
+        EDITOR.success('Exported successfully');
     } catch (error) {
-        EDITOR.error(`导出失败`, error.message, error);
+        EDITOR.error(`Export failed`, error.message, error);
     }
 }
 
 /**
- * 重置设置
+ * Reset settings
  */
 async function resetSettings() {
-    const { filterData, confirmation } = await filterTableDataPopup(USER.tableBaseDefaultSettings, "请选择需要重置的数据","建议重置前先备份数据")
+    const { filterData, confirmation } = await filterTableDataPopup(USER.tableBaseDefaultSettings, "Please select the data to reset","It is recommended to back up the data before resetting")
     if (!confirmation) return;
 
     try {
@@ -289,50 +289,50 @@ async function resetSettings() {
             initTableStructureToTemplate()
             BASE.refreshTempView(true)
         }
-        EDITOR.success('已重置所选设置');
+        EDITOR.success('Selected settings have been reset');
     } catch (error) {
-        EDITOR.error(`重置设置失败`, error.message, error);
+        EDITOR.error(`Failed to reset settings`, error.message, error);
     }
 }
 
 function InitBinging() {
-    console.log('初始化绑定')
-    // 开始绑定事件
-    // 导入预设
+    console.log('Initializing binding')
+    // Start binding events
+    // Import presets
     $('#table-set-import').on('click', () => importTableSet());
-    // 导出
+    // Export
     $("#table-set-export").on('click', () => exportTableSet());
-    // 重置设置
+    // Reset settings
     $("#table-reset").on('click', () => resetSettings());
-    // 回退表格2.0到1.0
+    // Rollback table from 2.0 to 1.0
     $("#table-init-from-2-to-1").on('click', async () => {
         if (await rollbackVersion() === true) {
             window.location.reload()
         }
     });
-    // 插件总体开关
+    // Plugin master switch
     $('#table_switch').change(function () {
         USER.tableBaseSetting.isExtensionAble = this.checked;
-        EDITOR.success(this.checked ? '插件已开启' : '插件已关闭，可以打开和手动编辑表格但AI不会读表和生成');
-        updateSystemMessageTableStatus();   // 将表格数据状态更新到系统消息中
+        EDITOR.success(this.checked ? 'Plugin enabled' : 'Plugin disabled, you can open and manually edit the table but the AI will not read or generate it');
+        updateSystemMessageTableStatus();   // Update the table data status to the system message
     });
-    // 调试模式开关
+    // Debug mode switch
     $('#table_switch_debug_mode').change(function () {
         USER.tableBaseSetting.tableDebugModeAble = this.checked;
-        EDITOR.success(this.checked ? '调试模式已开启' : '调试模式已关闭');
+        EDITOR.success(this.checked ? 'Debug mode enabled' : 'Debug mode disabled');
     });
-    // 插件读表开关
+    // Plugin read table switch
     $('#table_read_switch').change(function () {
         USER.tableBaseSetting.isAiReadTable = this.checked;
-        EDITOR.success(this.checked ? 'AI现在会读取表格' : 'AI现在将不会读表');
+        EDITOR.success(this.checked ? 'AI will now read the table' : 'AI will now not read the table');
     });
-    // 插件写表开关
+    // Plugin write table switch
     $('#table_edit_switch').change(function () {
         USER.tableBaseSetting.isAiWriteTable = this.checked;
-        EDITOR.success(this.checked ? 'AI的更改现在会被写入表格' : 'AI的更改现在不会被写入表格');
+        EDITOR.success(this.checked ? 'AI changes will now be written to the table' : 'AI changes will now not be written to the table');
     });
 
-    // 表格插入模式
+    // Table insertion mode
     $('#dataTable_injection_mode').change(function (event) {
         USER.tableBaseSetting.injection_mode = event.target.value;
     });
@@ -343,88 +343,88 @@ function InitBinging() {
         $('#step_by_step_options').toggle(step_by_step);
         USER.tableBaseSetting.step_by_step = step_by_step;
     })
-    // 确认执行
+    // Confirm execution
     $('#confirm_before_execution').change(function() {
         USER.tableBaseSetting.confirm_before_execution = $(this).prop('checked');
     })
-    // //整理表格相关高级设置
+    // //Advanced settings related to organizing tables
     // $('#advanced_settings').change(function() {
     //     $('#advanced_options').toggle(this.checked);
     //     USER.tableBaseSetting.advanced_settings = this.checked;
     // });
-    // 忽略删除
+    // Ignore deletion
     $('#ignore_del').change(function() {
         USER.tableBaseSetting.bool_ignore_del = $(this).prop('checked');
     });
-    // 忽略用户回复
+    // Ignore user replies
     $('#ignore_user_sent').change(function() {
         USER.tableBaseSetting.ignore_user_sent = $(this).prop('checked');
     });
-    // // 强制刷新
+    // // Force refresh
     // $('#bool_force_refresh').change(function() {
     //     USER.tableBaseSetting.bool_force_refresh = $(this).prop('checked');
     // });
-    // 静默刷新
+    // Silent refresh
     $('#bool_silent_refresh').change(function() {
         USER.tableBaseSetting.bool_silent_refresh = $(this).prop('checked');
     });
-    //token限制代替楼层限制
+    //Token limit instead of floor limit
     $('#use_token_limit').change(function() {
         $('#token_limit_container').toggle(this.checked);
         $('#clear_up_stairs_container').toggle(!this.checked);
         USER.tableBaseSetting.use_token_limit = this.checked;
     });
-    // 初始化API设置显示状态
+    // Initialize API settings display status
     $('#use_main_api').change(function() {
         USER.tableBaseSetting.use_main_api = this.checked;
     });
-    // 初始化API设置显示状态
+    // Initialize API settings display status
     $('#step_by_step_use_main_api').change(function() {
         USER.tableBaseSetting.step_by_step_use_main_api = this.checked;
     });
-    // 根据下拉列表选择的模型更新自定义模型名称
+    // Update custom model name based on the model selected in the dropdown list
     $('#model_selector').change(function(event) {
         $('#custom_model_name').val(event.target.value);
         USER.IMPORTANT_USER_PRIVACY_DATA.custom_model_name = event.target.value;
-        USER.saveSettings && USER.saveSettings(); // 保存设置
+        USER.saveSettings && USER.saveSettings(); // Save settings
     });
-    // 表格推送至对话开关
+    // Table push to conversation switch
     $('#table_to_chat').change(function () {
         USER.tableBaseSetting.isTableToChat = this.checked;
-        EDITOR.success(this.checked ? '表格会被推送至对话中' : '关闭表格推送至对话');
+        EDITOR.success(this.checked ? 'Table will be pushed to the conversation' : 'Turn off table push to conversation');
         $('#table_to_chat_options').toggle(this.checked);
-        updateSystemMessageTableStatus();   // 将表格数据状态更新到系统消息中
+        updateSystemMessageTableStatus();   // Update the table data status to the system message
     });
-    // 在扩展菜单栏中显示表格设置开关
+    // Show table settings in the extension menu switch
     $('#show_settings_in_extension_menu').change(function () {
         USER.tableBaseSetting.show_settings_in_extension_menu = this.checked;
         updateTableView();
     });
-    // 在扩展菜单栏中显示穿插模型设置开关
+    // Show alternating model settings in the extension menu switch
     $('#alternate_switch').change(function () {
         USER.tableBaseSetting.alternate_switch = this.checked;
-        EDITOR.success(this.checked ? '开启表格渲染穿插模式' : '关闭表格渲染穿插模式');
+        EDITOR.success(this.checked ? 'Enable table rendering alternating mode' : 'Disable table rendering alternating mode');
         updateTableView();
         updateAlternateTable();
     });
-    // 在扩展列表显示表格设置
+    // Show table settings in the extension list
     $('#show_drawer_in_extension_list').change(function () {
         USER.tableBaseSetting.show_drawer_in_extension_list = this.checked;
         updateTableView();
     });
-    // 推送至前端的表格数据可被编辑
+    // Table data pushed to the front end can be edited
     $('#table_to_chat_can_edit').change(function () {
         USER.tableBaseSetting.table_to_chat_can_edit = this.checked;
-        updateSystemMessageTableStatus();   // 将表格数据状态更新到系统消息中
+        updateSystemMessageTableStatus();   // Update the table data status to the system message
     });
-    // 根据下拉列表选择表格推送位置
+    // Select table push position according to the dropdown list
     $('#table_to_chat_mode').change(function(event) {
         USER.tableBaseSetting.table_to_chat_mode = event.target.value;
         $('#table_to_chat_is_micro_d').toggle(event.target.value === 'macro');
-        updateSystemMessageTableStatus();   // 将表格数据状态更新到系统消息中
+        updateSystemMessageTableStatus();   // Update the table data status to the system message
     });
 
-    // 根据下拉列表选择表格推送位置
+    // Select table push position according to the dropdown list
     $('#table_cell_width_mode').change(function(event) {
         USER.tableBaseSetting.table_cell_width_mode = event.target.value;
         getSheetsCellStyle()
@@ -434,7 +434,7 @@ function InitBinging() {
     // API URL
     $('#custom_api_url').on('input', function() {
         USER.IMPORTANT_USER_PRIVACY_DATA.custom_api_url = $(this).val();
-        USER.saveSettings && USER.saveSettings(); // 保存设置
+        USER.saveSettings && USER.saveSettings(); // Save settings
     });
     // API KEY
     let apiKeyDebounceTimer;
@@ -445,84 +445,84 @@ function InitBinging() {
                 const rawKey = $(this).val();
                 const result = processApiKey(rawKey, generateDeviceId());
                 USER.IMPORTANT_USER_PRIVACY_DATA.custom_api_key = result.encryptedResult.encrypted || result.encryptedResult;
-                USER.saveSettings && USER.saveSettings(); // 保存设置
+                USER.saveSettings && USER.saveSettings(); // Save settings
                 EDITOR.success(result.message);
             } catch (error) {
-                console.error('API Key 处理失败:', error);
-                EDITOR.error('未能获取到API KEY，请重新输入~', error.message, error);
+                console.error('API Key processing failed:', error);
+                EDITOR.error('Failed to get API KEY, please re-enter~', error.message, error);
             }
-        }, 500); // 500ms防抖延迟
+        }, 500); // 500ms debounce delay
     })
-    // 模型名称
+    // Model name
     $('#custom_model_name').on('input', function() {
         USER.IMPORTANT_USER_PRIVACY_DATA.custom_model_name = $(this).val();
-        USER.saveSettings && USER.saveSettings(); // 保存设置
+        USER.saveSettings && USER.saveSettings(); // Save settings
     });
-    // 表格消息模板
+    // Table message template
     $('#dataTable_message_template').on("input", function () {
         const value = $(this).val();
         USER.tableBaseSetting.message_template = value;
     })
-    // 表格深度
+    // Table depth
     $('#dataTable_deep').on("input", function () {
         const value = $(this).val();
         USER.tableBaseSetting.deep = Math.abs(value);
     })
-    // 分步填表提示词
+    // Step-by-step table filling prompt
     $('#step_by_step_user_prompt').on('input', function() {
         USER.tableBaseSetting.step_by_step_user_prompt = $(this).val();
     });
-    // 分步填表读取的上下文层数
+    // Number of context layers read for step-by-step table filling
     $('#separateReadContextLayers').on('input', function() {
         USER.tableBaseSetting.separateReadContextLayers = Number($(this).val());
     });
-    // 分步填表是否读取世界书
+    // Whether to read the world book for step-by-step table filling
     $('#separateReadLorebook').change(function() {
         USER.tableBaseSetting.separateReadLorebook = this.checked;
         USER.saveSettings && USER.saveSettings();
     });
-    // 重置分步填表提示词为默认值
+    // Reset the step-by-step table filling prompt to the default value
     $('#reset_step_by_step_user_prompt').on('click', function() {
         const defaultValue = USER.tableBaseDefaultSettings.step_by_step_user_prompt;
         $('#step_by_step_user_prompt').val(defaultValue);
-        // 同样更新内存中的设置
+        // Also update the settings in memory
         USER.tableBaseSetting.step_by_step_user_prompt = defaultValue;
-        EDITOR.success('分步填表提示词已重置为默认值。');
+        EDITOR.success('The step-by-step table filling prompt has been reset to the default value.');
     });
-    // 清理聊天记录楼层
+    // Clean up chat history floors
     $('#clear_up_stairs').on('input', function() {
         const value = $(this).val();
         $('#clear_up_stairs_value').text(value);
         USER.tableBaseSetting.clear_up_stairs = Number(value);
     });
-    // token限制
+    // token limit
     $('#rebuild_token_limit').on('input', function() {
         const value = $(this).val();
         $('#rebuild_token_limit_value').text(value);
         USER.tableBaseSetting.rebuild_token_limit_value = Number(value);
     });
-    // 模型温度设定
+    // Model temperature setting
     $('#custom_temperature').on('input', function() {
         const value = $(this).val();
         $('#custom_temperature_value').text(value);
         USER.tableBaseSetting.custom_temperature = Number(value);
     });
 
-    // 代理地址
+    // Proxy address
     $('#table_proxy_address').on('input', function() {
         USER.IMPORTANT_USER_PRIVACY_DATA.table_proxy_address = $(this).val();
-        USER.saveSettings && USER.saveSettings(); // 保存设置
+        USER.saveSettings && USER.saveSettings(); // Save settings
     });
-    // 代理密钥
+    // Proxy key
     $('#table_proxy_key').on('input', function() {
         USER.IMPORTANT_USER_PRIVACY_DATA.table_proxy_key = $(this).val();
-        USER.saveSettings && USER.saveSettings(); // 保存设置
+        USER.saveSettings && USER.saveSettings(); // Save settings
     });
 
-    // 获取模型列表
+    // Get model list
     $('#fetch_models_button').on('click', updateModelList);
 
-    // 测试API
+    // Test API
     $(document).on('click', '#table_test_api_button',async () => {
         const apiUrl = $('#custom_api_url').val();
         const modelName = $('#custom_model_name').val();
@@ -530,20 +530,20 @@ function InitBinging() {
         const results = await handleApiTestRequest(apiUrl, encryptedApiKeys, modelName);
     });
 
-    // 开始整理表格
+    // Start organizing the table
     $("#table_clear_up").on('click', () => {
         rebuildSheets()
     });
 
-    // 完整重建表格（合并到上面的下拉框内）
+    // Completely rebuild the table (merged into the dropdown box above)
     // $('#rebuild_table').on('click', () => rebuildTableActions(USER.tableBaseSetting.bool_force_refresh, USER.tableBaseSetting.bool_silent_refresh));
 
-    // 表格推送至对话
+    // Push table to conversation
     $("#dataTable_to_chat_button").on("click", async function () {
         customSheetsStylePopup()
     })
 
-    // 重整理模板编辑
+    // Reorganize template editing
     $("#rebuild--set-rename").on("click", modifyRebuildTemplate)
     $("#rebuild--set-new").on("click", newRebuildTemplate)
     $("#rebuild--set-delete").on("click", deleteRebuildTemplate)
@@ -554,7 +554,7 @@ function InitBinging() {
         USER.saveSettings && USER.saveSettings();
     });
 
-    // 手动触发分步填表
+    // Manually trigger step-by-step table filling
     $(document).on('click', '#trigger_step_by_step_button', () => {
         triggerStepByStepNow();
     });
@@ -562,10 +562,10 @@ function InitBinging() {
 }
 
 /**
- * 渲染设置
+ * Render settings
  */
 export function renderSetting() {
-    // 初始化数值
+    // Initialize values
     $(`#dataTable_injection_mode option[value="${USER.tableBaseSetting.injection_mode}"]`).prop('selected', true);
     $(`#table_to_chat_mode option[value="${USER.tableBaseSetting.table_to_chat_mode}"]`).prop('selected', true);
     $(`#table_cell_width_mode option[value="${USER.tableBaseSetting.table_cell_width_mode}"]`).prop('selected', true);
@@ -579,9 +579,9 @@ export function renderSetting() {
     $('#custom_temperature_value').text(USER.tableBaseSetting.custom_temperature);
     // Load step-by-step user prompt
     $('#step_by_step_user_prompt').val(USER.tableBaseSetting.step_by_step_user_prompt || '');
-    // 分步填表读取的上下文层数
+    // Number of context layers read for step-by-step table filling
     $('#separateReadContextLayers').val(USER.tableBaseSetting.separateReadContextLayers);
-    // 分步填表是否读取世界书
+    // Whether to read the world book for step-by-step table filling
     updateSwitch('#separateReadLorebook', USER.tableBaseSetting.separateReadLorebook);
     $("#fill_table_time").val(USER.tableBaseSetting.step_by_step ? 'after' : 'chat');
     refreshRebuildTemplate()
@@ -593,7 +593,7 @@ export function renderSetting() {
     $('#table_proxy_address').val(USER.IMPORTANT_USER_PRIVACY_DATA.table_proxy_address || '');
     $('#table_proxy_key').val(USER.IMPORTANT_USER_PRIVACY_DATA.table_proxy_key || '');
 
-    // 初始化开关状态
+    // Initialize switch status
     updateSwitch('#table_switch', USER.tableBaseSetting.isExtensionAble);
     updateSwitch('#table_switch_debug_mode', USER.tableBaseSetting.tableDebugModeAble);
     updateSwitch('#table_read_switch', USER.tableBaseSetting.isAiReadTable);
@@ -617,18 +617,18 @@ export function renderSetting() {
     $('#table_to_chat_options').toggle(USER.tableBaseSetting.isTableToChat);
     $('#table_to_chat_is_micro_d').toggle(USER.tableBaseSetting.table_to_chat_mode === 'macro');
 
-    // 不再在设置中显示表格结构
+    // No longer display the table structure in the settings
     // updateTableStructureDOM()
-    console.log("设置已渲染")
+    console.log("Settings have been rendered")
 }
 
 /**
- * 加载设置
+ * Load settings
  */
 export function loadSettings() {
     USER.IMPORTANT_USER_PRIVACY_DATA = USER.IMPORTANT_USER_PRIVACY_DATA || {};
 
-    // 旧版本提示词变更兼容
+    // Compatibility for old version prompt changes
     if (USER.tableBaseSetting.updateIndex < 3) {
         USER.getSettings().message_template = USER.tableBaseDefaultSettings.message_template
         USER.tableBaseSetting.to_chat_container = USER.tableBaseDefaultSettings.to_chat_container
@@ -636,7 +636,7 @@ export function loadSettings() {
         USER.tableBaseSetting.updateIndex = 3
     }
 
-    // 2版本表格结构兼容
+    // Compatibility for version 2 table structure
     console.log("updateIndex", USER.tableBaseSetting.updateIndex)
     if (USER.tableBaseSetting.updateIndex < 4) {
         // tableStructureToTemplate(USER.tableBaseSetting.tableStructure)
@@ -647,8 +647,8 @@ export function loadSettings() {
 
     renderSetting();
     InitBinging();
-    initRefreshTypeSelector(); // 初始化表格刷新类型选择器
-    updateTableView(); // 更新表格视图
+    initRefreshTypeSelector(); // Initialize table refresh type selector
+    updateTableView(); // Update table view
     getSheetsCellStyle()
 }
 
@@ -707,14 +707,14 @@ function templateToTableStructure() {
 }
 
 /**
- * 刷新重整理模板
+ * Refresh reorganization template
  */
 export function refreshRebuildTemplate() {
     const templateSelect = $('#rebuild--select');
-    templateSelect.empty(); // 清空现有选项
+    templateSelect.empty(); // Clear existing options
     const defaultOption = $('<option>', {
         value: "rebuild_base",
-        text: "默认",
+        text: "Default",
     });
     templateSelect.append(defaultOption);
     Object.keys(USER.tableBaseSetting.rebuild_message_template_list).forEach(key => {
@@ -724,9 +724,9 @@ export function refreshRebuildTemplate() {
         });
         templateSelect.append(option);
     });
-    // 设置默认选中项
+    // Set default selected item
     if (USER.tableBaseSetting.lastSelectedTemplate) {
-        console.log("默认", USER.tableBaseSetting.lastSelectedTemplate)
+        console.log("Default", USER.tableBaseSetting.lastSelectedTemplate)
         $('#rebuild--select').val(USER.tableBaseSetting.lastSelectedTemplate);
     }
 }

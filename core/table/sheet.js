@@ -3,68 +3,68 @@ import { SheetBase } from "./base.js";
 import { cellStyle, filterSavingData } from "./utils.js";
 import { Cell } from "./cell.js";
 /**
- * 表格类，用于管理表格数据
- * @description 表格类用于管理表格数据，包括表格的名称、域、类型、单元格数据等
- * @description 表格类还提供了对表格的操作，包括创建、保存、删除、渲染等
+ * Table class, used to manage table data
+ * @description The table class is used to manage table data, including the table's name, domain, type, cell data, etc.
+ * @description The table class also provides operations on the table, including creating, saving, deleting, rendering, etc.
  */
 export class Sheet extends SheetBase {
     constructor(target = null) {
         super(target);
 
-        this.currentPopupMenu = null;           // 用于跟踪当前弹出的菜单 - 移动到 Sheet (如果需要PopupMenu仍然在Sheet中管理)
-        this.element = null;                    // 用于存储渲染后的 table 元素
-        this.lastCellEventHandler = null;       // 保存最后一次使用的 cellEventHandler
-        this.template = null;       // 用于存储模板
+        this.currentPopupMenu = null;           // Used to track the currently popped-up menu - move to Sheet (if PopupMenu still needs to be managed in Sheet)
+        this.element = null;                    // Used to store the rendered table element
+        this.lastCellEventHandler = null;       // Save the last used cellEventHandler
+        this.template = null;       // Used to store the template
         this.#load(target);
     }
 
     /**
-     * 渲染表格
-     * @description 接受 cellEventHandler 参数，提供一个 `Cell` 对象作为回调函数参数，用于处理单元格事件
-     * @description 可以通过 `cell.parent` 获取 Sheet 对象，因此不再需要传递 Sheet 对象
-     * @description 如果不传递 cellEventHandler 参数，则使用上一次的 cellEventHandler
+     * Render the table
+     * @description Accepts the cellEventHandler parameter, provides a `Cell` object as a callback function parameter, used to handle cell events
+     * @description You can get the Sheet object through `cell.parent`, so you no longer need to pass the Sheet object
+     * @description If the cellEventHandler parameter is not passed, the last cellEventHandler is used
      * @param {Function} cellEventHandler
      * @param targetHashSheet
      * */
     renderSheet(cellEventHandler = this.lastCellEventHandler, targetHashSheet = this.hashSheet, lastCellsHashSheet = null) {
         this.lastCellEventHandler = cellEventHandler;
 
-        // 预先计算渲染所需的数据副本，避免修改实际的 this.hashSheet
+        // Pre-calculate the data copy needed for rendering to avoid modifying the actual this.hashSheet
         const currentHashSheet = Array.isArray(targetHashSheet) ? targetHashSheet : (this.hashSheet || []);
-        // 仅对数组做本地浅拷贝；不要调用 BASE.copyHashSheets（它面向 hash_sheets 映射对象，不是二维数组）
+        // Only perform a local shallow copy on the array; do not call BASE.copyHashSheets (it targets the hash_sheets mapping object, not a 2D array)
         let renderHashSheet = Array.isArray(currentHashSheet)
             ? currentHashSheet.map(r => (Array.isArray(r) ? r.slice() : []))
             : [];
 
-        // 集成单元格高亮逻辑（来源：chatSheetsDataView.cellHighlight）
-        // 1) 获取上一轮的 hash_sheets（优先使用参数；若无参数且存在渲染上下文，则自动计算）
+        // Integrate cell highlighting logic (Source: chatSheetsDataView.cellHighlight)
+        // 1) Get the hash_sheets from the previous round (prioritize using parameters; if no parameters and a rendering context exists, calculate automatically)
         let prevHashSheetsMap = lastCellsHashSheet;
         if (prevHashSheetsMap === null && typeof DERIVED?.any?.renderDeep === 'number' && DERIVED.any.renderDeep !== 0) {
             try {
                 prevHashSheetsMap = BASE.getLastSheetsPiece(DERIVED.any.renderDeep - 1, 3, false)?.piece?.hash_sheets;
                 if (prevHashSheetsMap) prevHashSheetsMap = BASE.copyHashSheets(prevHashSheetsMap);
             } catch (_) {
-                // 忽略获取失败，保持无高亮
+                // Ignore retrieval failure and maintain no highlighting
             }
         }
 
         const lastHashSheet = prevHashSheetsMap?.[this.uid] || [];
 
-        // 2) 找出被删除的行（上一轮存在但本轮不存在的行首），并在渲染副本中插入这些行用于高亮展示（不修改实际数据）
+        // 2) Find the deleted rows (row headers that existed in the previous round but not in this one), and insert these rows into the rendering copy for highlighted display (without modifying actual data)
         const deleteRowFirstHashes = [];
         if (prevHashSheetsMap) {
             const currentFlat = currentHashSheet.flat();
             lastHashSheet.forEach((row, index) => {
                 if (!currentFlat.includes(row?.[0])) {
                     deleteRowFirstHashes.push(row?.[0]);
-                    // 在渲染副本中插入
+                    // Insert into the rendering copy
                     const rowCopy = row ? row.slice() : [];
                     renderHashSheet.splice(index, 0, rowCopy);
                 }
             });
         }
 
-        // DOM 构建
+        // DOM construction
         this.element = document.createElement('table');
         this.element.classList.add('sheet-table', 'tableDom');
         this.element.style.position = 'relative';
@@ -79,46 +79,46 @@ export class Sheet extends SheetBase {
 
         const tbody = document.createElement('tbody');
         this.element.appendChild(tbody);
-        // 清空 tbody 的内容
+        // Clear the content of tbody
         tbody.innerHTML = '';
 
-        // 遍历渲染用的 hashSheet 副本，渲染每一个单元格
+        // Iterate through hashSheet to render each cell
         renderHashSheet.forEach((rowUids, rowIndex) => {
             const rowElement = document.createElement('tr');
             rowUids.forEach((cellUid, colIndex) => {
                 let cell = this.cells.get(cellUid)
                 if (!cell) {
                     console.warn(`Cell not found: ${cellUid}`);
-                    cell = new Cell(this); // 如果没有找到对应的单元格，则创建一个新的 Cell 实例
-                    cell.uid = cellUid; // 设置 uid
-                    cell.data = { value: '' }; // 初始化数据
-                    this.cells.set(cellUid, cell); // 将新创建的单元格添加到 cells 中
+                    cell = new Cell(this); // If the corresponding cell is not found, create a new Cell instance
+                    cell.uid = cellUid; // Set uid
+                    cell.data = { value: '' }; // Initialize data
+                    this.cells.set(cellUid, cell); // Add the newly created cell to cells
                 }
                 const cellElement = cell.initCellRender(rowIndex, colIndex);
-                rowElement.appendChild(cellElement);    // 调用 Cell 的 initCellRender 方法，仍然需要传递 rowIndex, colIndex 用于渲染单元格内容
+                rowElement.appendChild(cellElement);    // Call the initCellRender method of Cell, still need to pass rowIndex, colIndex to render the cell content
                 if (cellEventHandler) {
                     cellEventHandler(cell);
                 }
             });
-            tbody.appendChild(rowElement); // 将 rowElement 添加到 tbody 中
+            tbody.appendChild(rowElement); // Add rowElement to tbody
         });
 
-        // 若无上一轮数据，则不进行高亮，直接返回
+        // If there is no data from the previous round, skip highlighting and return directly
         if (!prevHashSheetsMap) return this.element;
 
-        // 当当前或上一轮表格都只有表头（或为空）时，直接返回（不做 keep-all 处理）
+        // When both the current or previous round's tables only have headers (or are empty), return directly (skip keep-all processing)
         if ((currentHashSheet.length < 2) && (lastHashSheet.length < 2)) {
             renderHashSheet[0].forEach((hash) => {
                 const sheetCell = this.cells.get(hash);
                 const cellElement = sheetCell?.element;
                 cellElement.classList.add('keep-all-item');
             })
-            return this.element; // 表格内容为空时不执行后续逻辑，提升健壮性
+            return this.element; // Do not execute subsequent logic when the table content is empty to improve robustness
         }
 
         const lastHashSheetFlat = lastHashSheet.flat();
 
-        // 3) 为每个单元格打上变化类型标记（基于渲染副本）
+        // 3) Mark each cell with a change type tag (based on the rendering copy)
         const changeSheet = renderHashSheet.map((row) => {
             const isNewRow = !lastHashSheetFlat.includes(row?.[0]);
             const isDeletedRow = deleteRowFirstHashes.includes(row?.[0]);
@@ -130,7 +130,7 @@ export class Sheet extends SheetBase {
             })
         });
 
-        // 4) 根据变化类型为元素添加样式类
+        // 4) Add style classes to elements based on change types
         let isKeepAllSheet = true;
         let isKeepAllCol = Array.from({ length: changeSheet[0].length }, (_, i) => i < 2 ? false : true);
         changeSheet.forEach((row, rowIndex) => {
@@ -186,7 +186,7 @@ export class Sheet extends SheetBase {
     }
 
     /**
-     * 保存表格数据
+     * Save table data
      * @returns {Sheet|boolean}
      */
     save(targetPiece = USER.getChatPiece()?.piece, manualSave = false) {
@@ -202,66 +202,66 @@ export class Sheet extends SheetBase {
             }
             BASE.sheetsData.context = sheets;
             if (!targetPiece) {
-                console.log("没用消息能承载hash_sheets数据，不予保存")
+                console.log("No message can carry hash_sheets data, not saved")
                 return this
             }
             if (!targetPiece.hash_sheets) targetPiece.hash_sheets = {};
             targetPiece.hash_sheets[this.uid] = this.hashSheet?.map(row => row.map(hash => hash));
-            console.log('保存表格数据', targetPiece, this.hashSheet);
+            console.log('Save table data', targetPiece, this.hashSheet);
             if (!manualSave) USER.saveChat();
 
             return this;
         } catch (e) {
-            EDITOR.error(`保存模板失败`, e.message, e);
+            EDITOR.error(`Failed to save template`, e.message, e);
             return false;
         }
     }
 
     /**
-     * 创建新的 Sheet 实例
-     * @returns {Sheet} - 返回新的 Sheet 实例
+     * Create a new Sheet instance
+     * @returns {Sheet} - Returns the new Sheet instance
      */
     createNewSheet(column = 2, row = 2, isSave = true) {
-        this.init(column, row);     // 初始化基本数据结构
+        this.init(column, row);     // Initialize the basic data structure
         this.uid = `sheet_${SYSTEM.generateRandomString(8)}`;
-        this.name = `新表格_${this.uid.slice(-4)}`;
-        if (isSave) this.save();    // 保存新创建的 Sheet
-        return this;                // 返回 Sheet 实例自身
+        this.name = `New Table_${this.uid.slice(-4)}`;
+        if (isSave) this.save();    // Save the newly created Sheet
+        return this;                // Return the Sheet instance itself
     }
 
     /**
-     * 获取表格内容的提示词，可以通过指定['title', 'node', 'headers', 'rows', 'editRules']中的部分，只获取部分内容
-     * @returns 表格内容提示词
+     * Get the prompt for the table content, you can specify parts of ['title', 'node', 'headers', 'rows', 'editRules'] to get only part of the content
+     * @returns Table content prompt
      */
     getTableText(index, customParts = ['title', 'node', 'headers', 'rows', 'editRules']) {
-        console.log('获取表格内容提示词', this)
-        if (this.triggerSend && this.triggerSendDeep < 1) return ''; // 如果触发深度=0，则不发送，可以用作信息一览表
+        console.log('Get table content prompt', this)
+        if (this.triggerSend && this.triggerSendDeep < 1) return ''; // If the trigger depth is 0, it will not be sent, and can be used as an information overview table
         const title = `* ${index}:${this.name}\n`;
-        const node = this.source.data.note && this.source.data.note !== '' ? '【说明】' + this.source.data.note + '\n' : '';
+        const node = this.source.data.note && this.source.data.note !== '' ? '【Description】' + this.source.data.note + '\n' : '';
         const headers = "rowIndex," + this.getCellsByRowIndex(0).slice(1).map((cell, index) => index + ':' + cell.data.value).join(',') + '\n';
         let rows = this.getSheetCSV()
         const editRules = this.#getTableEditRules() + '\n';
-        // 新增触发式表格内容发送，检索聊天内容的角色名
+        // Add triggered table content sending, retrieve the character name in the chat content
 
 
         if (rows && this.triggerSend) {
             const chats = USER.getContext().chat;
-            console.log("进入触发发送模式,测试获取chats", chats)
-            // 提取所有聊天内容中的 content 值
+            console.log("Enter trigger sending mode, test get chats", chats)
+            // Extract the content value in all chat content
             const chat_content = getLatestChatHistory(chats, this.triggerSendDeep)
-            console.log('获取聊天内容: ', chat_content)
-            console.log("聊天内容类型:", typeof (chat_content))
+            console.log('Get chat content: ', chat_content)
+            console.log("Chat content type:", typeof (chat_content))
             const rowsArray = rows.split('\n').filter(line => {
                 line = line.trim();
                 if (!line) return false;
                 const parts = line.split(',');
-                const str1 = parts?.[1] ?? ""; // 字符串1对应索引1
+                const str1 = parts?.[1] ?? ""; // string 1 corresponds to index 1
                 return chat_content.includes(str1);
             });
             rows = rowsArray.join('\n');
         }
         let result = '';
-        console.log('测试获取表格内容提示词', customParts, result, this);
+        console.log('Test get table content prompt', customParts, result, this);
         if (customParts.includes('title')) {
             result += title;
         }
@@ -269,7 +269,7 @@ export class Sheet extends SheetBase {
             result += node;
         }
         if (customParts.includes('headers')) {
-            result += '【表格内容】\n' + headers;
+            result += '【Table Content】\n' + headers;
         }
         if (customParts.includes('rows')) {
             result += rows;
@@ -282,8 +282,8 @@ export class Sheet extends SheetBase {
 
 
     /**
-     * 获取表格的content数据（与旧版兼容）
-     * @returns {string[][]} - 返回表格的content数据
+     * Get the content data of the table (compatible with the old version)
+     * @returns {string[][]} - Returns the content data of the table
      */
     getContent(withHead = false) {
         if (!withHead && this.isEmpty()) return [];
@@ -295,7 +295,7 @@ export class Sheet extends SheetBase {
             })
         );
 
-        // 去掉每一行的第一个元素
+        // Remove the first element of each row
         const trimmedContent = content.map(row => row.slice(1));
         if (!withHead) return trimmedContent.slice(1);
         return content;
@@ -318,7 +318,7 @@ export class Sheet extends SheetBase {
             content: this.getContent()
         }
     }
-    /** _______________________________________ 以下函数不进行外部调用 _______________________________________ */
+    /** _______________________________________ The following functions are not called externally _______________________________________ */
 
     #load(target) {
         if (target == null) {
@@ -330,15 +330,15 @@ export class Sheet extends SheetBase {
                 this.loadJson(targetSheetData)
                 return this;
             }
-            throw new Error('未找到对应的模板');
+            throw new Error('Could not find corresponding template');
         }
         if (typeof target === 'object') {
             if (target.domain === SheetBase.SheetDomain.global) {
-                console.log('从模板转化表格', target, this);
+                console.log('Converting table from template', target, this);
                 this.loadJson(target)
                 this.domain = 'chat'
                 this.uid = `sheet_${SYSTEM.generateRandomString(8)}`;
-                this.name = this.name.replace('模板', '表格');
+                this.name = this.name.replace('Template', 'Table');
                 this.template = target;
                 return this
             } else {
@@ -348,23 +348,23 @@ export class Sheet extends SheetBase {
         }
     }
     /**
-     * 获取表格编辑规则提示词
+     * Get table editing rule prompt
      * @returns
      */
     #getTableEditRules() {
         const source = this.source;
-        if (this.required && this.isEmpty()) return '【增删改触发条件】\n插入：' + source.data.initNode + '\n'
+        if (this.required && this.isEmpty()) return '【Trigger Conditions for Add/Delete/Modify】\nInsert:' + source.data.initNode + '\n'
         else {
-            let editRules = '【增删改触发条件】\n'
-            if (source.data.insertNode) editRules += ('插入：' + source.data.insertNode + '\n')
-            if (source.data.updateNode) editRules += ('更新：' + source.data.updateNode + '\n')
-            if (source.data.deleteNode) editRules += ('删除：' + source.data.deleteNode + '\n')
+            let editRules = '【Trigger Conditions for Add/Delete/Modify】\n'
+            if (source.data.insertNode) editRules += ('Insert:' + source.data.insertNode + '\n')
+            if (source.data.updateNode) editRules += ('Update:' + source.data.updateNode + '\n')
+            if (source.data.deleteNode) editRules += ('Delete:' + source.data.deleteNode + '\n')
             return editRules
         }
     }
 
     /**
-     * 初始化hashSheet，只保留表头
+     * Initialize hashSheet, only keep the header
      */
     initHashSheet() {
         this.hashSheet = [this.hashSheet[0].map(uid => uid)];
@@ -372,8 +372,8 @@ export class Sheet extends SheetBase {
     }
 
     /**
-     * 根据 "A1" 格式的地址获取单元格
-     * @param {string} address - 例如 "A1", "B2"
+     * Get a cell from an address in "A1" format
+     * @param {string} address - e.g. "A1", "B2"
      * @returns {Cell|null}
      */
     getCellFromAddress(address) {
@@ -400,9 +400,9 @@ export class Sheet extends SheetBase {
 }
 
 /**
- * 获取制定深度的聊天历史内容
- * @param {当前聊天文件} chat
- * @param {扫描深度} deep
+ * Get the chat history content of the specified depth
+ * @param {Current chat file} chat
+ * @param {Scan depth} deep
  * @returns string
  */
 function getLatestChatHistory(chat, deep) {
@@ -410,9 +410,9 @@ function getLatestChatHistory(chat, deep) {
 
     let collected = "";
     const floors = filteredChat.length
-    // 从最新记录开始逆序遍历，最大不超过聊天记录最大楼层
+    // Traverse in reverse order from the latest record, the maximum does not exceed the maximum floor of the chat record
     for (let i = 0; i < Math.min(deep, floors); i++) {
-        // 格式化消息并清理标签
+        // Format the message and clean up the tags
         const currentStr = `${filteredChat[floors - i - 1].mes}`
             .replace(/<tableEdit>[\s\S]*?<\/tableEdit>/g, '');
         collected += currentStr;
