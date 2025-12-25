@@ -1,0 +1,46 @@
+# Translation Scan Blacklist
+# Add directory names or paths to exclude from translation scanning
+# Lines starting with # are comments and will be ignored
+# Empty lines are also ignored
+#
+# Examples:
+# node_modules/         # Exclude node_modules directory
+# .git/                 # Exclude .git directory
+# dist/                 # Exclude build output directories
+# .venv/                # Exclude Python virtual environments
+# __pycache__/          # Exclude Python cache directories
+#
+# You can also specify partial paths:
+# scripts/old/          # Exclude scripts/old directory
+# assets/images/        # Exclude assets/images directory
+
+# Default exclusions (uncomment to use)
+node_modules/
+.vscode/
+__pycache__/
+dist/
+build/
+coverage/
+.next/
+.nuxt/
+.output/
+.cache/
+
+# testing that it will ignore all the folders
+.gitignore
+scan_blacklist.txt
+staged_diff.txt
+translations.json
+idealoutput.json
+untranslated.json
+.git/
+.venv/
+.PythonTools/
+assets/locales/
+images/
+# components/
+# core/
+# data/
+# scripts/
+# services/
+# utils/
